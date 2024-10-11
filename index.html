@@ -3,48 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Save Input with LocalStorage</title>
+    <title>NIP Ruang - Absensi YouTube</title>
+    <!-- Link ke Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin-top: 50px;
+        }
+        #successMessage, #errorMessage {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <h2>Form Data Input</h2>
-    <form id="myForm">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
-        <br>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-        <br><br>
-        <button type="submit">Submit</button>
-    </form>
+    <div class="container">
+        <h1 class="text-center">Absensi NIP Ruang</h1>
+        
+        <!-- Link ke YouTube -->
+        <p class="text-center">Silakan tonton dan like video YouTube berikut sebelum absen:</p>
+        <div class="text-center">
+            <a href="https://www.youtube.com/watch?v=example" target="_blank" class="btn btn-primary">Tonton Video</a>
+        </div>
 
-    <h3>Saved Data:</h3>
-    <p id="savedData"></p>
+        <p class="text-center mt-3">Setelah Anda like video, klik tombol di bawah ini untuk mengisi absen.</p>
+        <div class="text-center">
+            <button class="btn btn-success" onclick="showForm()">Saya sudah menonton dan like</button>
+        </div>
+
+        <!-- Form input untuk Nama, NIP, dan Ruang -->
+        <div id="formSection" class="mt-4" style="display: none;">
+            <form id="absenForm" onsubmit="submitForm(); return false;">
+                <div class="form-group">
+                    <label for="name">Nama:</label>
+                    <input type="text" class="form-control" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="nip">NIP:</label>
+                    <input type="text" class="form-control" id="nip" required>
+                </div>
+                <div class="form-group">
+                    <label for="room">Ruang:</label>
+                    <input type="text" class="form-control" id="room" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+
+        <!-- Pesan sukses dan error -->
+        <div id="successMessage" class="alert alert-success mt-4">Terima kasih, absensi Anda sudah tercatat.</div>
+        <div id="errorMessage" class="alert alert-danger mt-4">Maaf, ada kesalahan dalam pengiriman data.</div>
+    </div>
+
+    <!-- Link ke Bootstrap JS dan jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-        // Event listener for form submission
-        document.getElementById('myForm').addEventListener('submit', function(event) {
-            event.preventDefault();  // Prevent form from refreshing page
+        // Tampilkan form absensi setelah pengguna mengklik "Saya sudah menonton dan like"
+        function showForm() {
+            document.getElementById('formSection').style.display = 'block';
+        }
 
-            // Get input values
+        // Fungsi untuk submit form dan mengirim data ke spreadsheet melalui API SheetDB
+        function submitForm() {
+            // Ambil data dari form
             const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
+            const nip = document.getElementById('nip').value;
+            const room = document.getElementById('room').value;
 
-            // Save data to LocalStorage
-            localStorage.setItem('name', name);
-            localStorage.setItem('email', email);
+            // Data yang akan dikirim
+            const data = {
+                data: {
+                    Nama: name,
+                    NIP: nip,
+                    Ruang: room
+                }
+            };
 
-            // Display saved data
-            document.getElementById('savedData').innerHTML = `Name: ${name}, Email: ${email}`;
-        });
-
-        // On page load, display saved data if available
-        window.onload = function() {
-            const savedName = localStorage.getItem('name');
-            const savedEmail = localStorage.getItem('email');
-            if (savedName && savedEmail) {
-                document.getElementById('savedData').innerHTML = `Name: ${savedName}, Email: ${savedEmail}`;
-            }
-        };
+            // Kirim data ke SheetDB API dengan target Sheet1
+            fetch("https://sheetdb.io/api/v1/9fjbl4tka5tjb", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Tampilkan pesan sukses jika berhasil
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('absenForm').reset();
+                document.getElementById('formSection').style.display = 'none';
+            })
+            .catch(error => {
+                // Tampilkan pesan error jika gagal
+                document.getElementById('errorMessage').style.display = 'block';
+            });
+        }
     </script>
 </body>
 </html>
