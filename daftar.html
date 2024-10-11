@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Absensi</title>
+    <!-- Link ke Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Daftar Absensi</h1>
+        
+        <!-- Input untuk pencarian -->
+        <div class="form-group">
+            <input type="text" id="searchInput" class="form-control" placeholder="Cari berdasarkan Nama, NIP, atau Ruang" onkeyup="filterData()">
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>No</th> <!-- Kolom untuk nomor urut -->
+                    <th>Nama</th>
+                    <th>NIP</th>
+                    <th>Ruang</th>
+                </tr>
+            </thead>
+            <tbody id="data-table-body">
+                <!-- Data dari spreadsheet akan ditampilkan di sini -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Link ke Bootstrap JS dan jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        let allData = []; // Menyimpan semua data untuk pencarian
+
+        // Fungsi untuk mengambil data dari SheetDB dan menampilkan di tabel
+        function fetchData() {
+            fetch("https://sheetdb.io/api/v1/9fjbl4tka5tjb")
+                .then(response => response.json())
+                .then(data => {
+                    allData = data; // Simpan data ke variabel global
+                    displayData(data); // Tampilkan data di tabel
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        }
+
+        // Fungsi untuk menampilkan data di tabel
+        function displayData(data) {
+            const tableBody = document.getElementById('data-table-body');
+            tableBody.innerHTML = ''; // Kosongkan tabel sebelumnya
+
+            data.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td> <!-- Menampilkan nomor urut -->
+                    <td>${item.Nama}</td>
+                    <td>${item.NIP}</td>
+                    <td>${item.Ruang}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Fungsi untuk memfilter data berdasarkan input pencarian
+        function filterData() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const filteredData = allData.filter(item => {
+                return (
+                    item.Nama.toLowerCase().includes(searchInput) ||
+                    item.NIP.toLowerCase().includes(searchInput) ||
+                    item.Ruang.toLowerCase().includes(searchInput)
+                );
+            });
+            displayData(filteredData); // Tampilkan data yang difilter
+        }
+
+        // Ambil data saat halaman dimuat
+        window.onload = fetchData;
+    </script>
+</body>
+</html>
