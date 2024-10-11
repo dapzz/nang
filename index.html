@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NIP Ruang - Absensi YouTube</title>
+    <title>LIKE YOUTUBE</title>
     <!-- Link ke Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -18,12 +18,14 @@
 </head>
 <body>
     <div class="container">
-        <h1 class="text-center">Absensi NIP Ruang</h1>
+        <h2 class="text-center">ABSEN LIKE YOUTUBE</h2>
         
         <!-- Link ke YouTube -->
         <p class="text-center">Silakan tonton dan like video YouTube berikut sebelum absen:</p>
         <div class="text-center">
-            <a href="https://www.youtube.com/watch?v=example" target="_blank" class="btn btn-primary">Tonton Video</a>
+		<iframe width="560" height="315" src="https://www.youtube.com/embed/EJmrd3kBxVY" frameborder="0" allowfullscreen></iframe>
+
+          <br> <a href="https://www.youtube.com/watch?v=example" target="_blank" class="btn btn-primary">Tonton Video</a>
         </div>
 
         <p class="text-center mt-3">Setelah Anda like video, klik tombol di bawah ini untuk mengisi absen.</p>
@@ -46,7 +48,11 @@
                     <label for="room">Ruang:</label>
                     <input type="text" class="form-control" id="room" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
+				<div class="form-group">
+                    <label for="room">Email:</label>
+                    <input type="text" class="form-control" id="email" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Simpan</button>
             </form>
         </div>
 
@@ -72,13 +78,15 @@
             const name = document.getElementById('name').value;
             const nip = document.getElementById('nip').value;
             const room = document.getElementById('room').value;
-
+            const email = document.getElementById('email').value;
+			
             // Data yang akan dikirim
             const data = {
                 data: {
                     Nama: name,
                     NIP: nip,
-                    Ruang: room
+                    Ruang: room,
+					Email: email
                 }
             };
 
