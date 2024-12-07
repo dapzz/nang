@@ -1,116 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIKE YOUTUBE</title>
-    <!-- Link ke Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin-top: 50px;
-        }
-        #successMessage, #errorMessage {
-            display: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Data Karyawan</title>
 </head>
-<body>
-    <div class="container">
-        <h2 class="text-center">ABSEN LIKE YOUTUBE</h2>
-        
-        <!-- Link ke YouTube -->
-        <p class="text-center">Silakan tonton dan like video YouTube berikut sebelum absen:</p>
-	
-        <div class="text-center">
-		<iframe src="https://www.youtube.com/embed/EJmrd3kBxVY" frameborder="0" allowfullscreen></iframe>
-          <br> <a href="https://www.youtube.com/watch?v=EJmrd3kBxVY" target="_blank" class="btn btn-primary">Tonton Video</a>
-        </div>
+<body class="bg-gray-100 font-sans">
+  <div class="container mx-auto py-8">
+    <h1 class="text-2xl font-bold text-center mb-6">DATA NIP KARYAWAN BARU</h1>
+	<h2 class="font-bold text-left mb-6 text-blue-500 hover:text-blue-700"><a href="https://app.harapananda.com/sigawai" target="_blank" rel="noopener noreferrer">Buka Aplikasi SIGAWAI</a></h2>
+   
 
-	
-        <p class="text-center mt-3">Setelah Anda like video, klik tombol di bawah ini untuk mengisi absen.</p>
-        <div class="text-center">
-            <button class="btn btn-success" onclick="showForm()">Saya sudah menonton dan like</button>
-        </div>
-
-        <!-- Form input untuk Nama, NIP, dan Ruang -->
-        <div id="formSection" class="mt-4" style="display: none;">
-            <form id="absenForm" onsubmit="submitForm(); return false;">
-                <div class="form-group">
-                    <label for="name">Nama:</label>
-                    <input type="text" class="form-control" id="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="nip">NIP:</label>
-                    <input type="text" class="form-control" id="nip" required>
-                </div>
-                <div class="form-group">
-                    <label for="room">Ruang:</label>
-                    <input type="text" class="form-control" id="room" required>
-                </div>
-				<div class="form-group">
-                    <label for="room">Email:</label>
-                    <input type="text" class="form-control" id="email" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Simpan</button>
-            </form>
-        </div>
-
-        <!-- Pesan sukses dan error -->
-        <div id="successMessage" class="alert alert-success mt-4">Terima kasih, absensi Anda sudah tercatat. cek data  <a href="daftar.html" target="_blank" class="btn btn-primary">Disini</a></div>
-        <div id="errorMessage" class="alert alert-danger mt-4">Maaf, ada kesalahan dalam pengiriman data.</div>
+   <!-- Input Cari -->
+    <div class="mb-4">
+      <input 
+        id="searchInput" 
+        type="text" 
+        placeholder="Cari nama atau NIP..." 
+        class="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+      />
     </div>
 
-    <!-- Link ke Bootstrap JS dan jQuery -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Tabel -->
+    <div class="overflow-x-auto">
+      <table class="table-auto w-full bg-white rounded-lg shadow-md">
+        <thead class="bg-gray-200">
+          <tr>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">No</th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Nama</th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">NIP</th>
+            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">QR Code</th>
+          </tr>
+        </thead>
+        <tbody id="dataTable">
+          <!-- Data akan di-generate oleh JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-    <script>
-        // Tampilkan form absensi setelah pengguna mengklik "Saya sudah menonton dan like"
-        function showForm() {
-            document.getElementById('formSection').style.display = 'block';
+  <!-- Modal -->
+  <div id="qrModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg p-6 relative">
+      <button 
+        id="closeModal" 
+        class="absolute top-2 right-2 text-gray-400 hover:text-gray-600 focus:outline-none">
+        ✖
+      </button>
+      <h2 class="text-lg font-bold text-gray-700 mb-4">QR Code (HD)</h2>
+      <canvas id="qrCanvas" class="mx-auto"></canvas>
+    </div>
+  </div>
+
+  <script>
+    // Data karyawan
+    const employees = [
+      { no: 1, nama: "Rafi Tegar Fachrezi, A.Md.Kom", nip: "120404032214" },
+      { no: 2, nama: "Muhammad Irfan Bakhtiar, S.Tr.Kom", nip: "120404022215" },
+      { no: 3, nama: "Firyal Aulia Rahma, S.Ak, ACPA", nip: "120404022216" },
+      { no: 4, nama: "Muhammad Fa'iz Al'azami, A.Md.Kep", nip: "120402032217" },
+      { no: 5, nama: "Kartika Dwi Rangga, A.Md.Kep", nip: "120402032218" },
+      { no: 6, nama: "Muhammad Daffa Musyaffa, A.Md.Kep", nip: "120402032219" },
+      { no: 7, nama: "Mohammad Bilal Firmansyah, A.Md.Kep", nip: "120402032220" },
+      { no: 8, nama: "Wildan Ardhi Nurdiansyah, A.Md.Kep", nip: "120402032221" },
+      { no: 9, nama: "Rizki Karunia Febriyanto, A.Md.Kep", nip: "120402032222" },
+      { no: 10, nama: "M. Rudy Afandy, A.Md.Kep", nip: "120402032223" },
+	  { no: 11, nama: "Dwi Guna Agung Riyadi, S.Kep.Ners", nip: "120402022224" },
+      { no: 12, nama: "Muhammad Rafi Fathurrohman, S.Kep.Ners", nip: "120402022225" },
+      { no: 13, nama: "Agus Priyanto, S.Kep.Ners", nip: "120402022226" },
+      { no: 14, nama: "Muhamad Maulana Rafi, S.Kep.Ners", nip: "120402022227" },
+      { no: 15, nama: "Bagus Fadhilah, S.Kep.Ners", nip: "120402022228" },
+      { no: 16, nama: "Hilda Sulistya Utami, S.Kes.Ftr", nip: "120402022229" },
+      { no: 17, nama: "Dyah Sulistyowati, S.Fis", nip: "120402022230" },
+      { no: 18, nama: "Amalia Mulyani, S.Tr.Kes", nip: "120402022231" },
+      { no: 19, nama: "Nurul Fajar Sakinah, A.Md.Kes", nip: "120402022232" },
+    ];
+
+    // Generate Tabel
+    const tableBody = document.getElementById('dataTable');
+    employees.forEach(employee => {
+      const row = document.createElement('tr');
+      row.classList.add('border-t');
+
+      // Kolom No
+      const noCell = document.createElement('td');
+      noCell.classList.add('px-4', 'py-2', 'text-sm', 'text-gray-600');
+      noCell.textContent = employee.no;
+      row.appendChild(noCell);
+
+      // Kolom Nama
+      const namaCell = document.createElement('td');
+      namaCell.classList.add('px-4', 'py-2', 'text-sm', 'text-gray-600');
+      namaCell.textContent = employee.nama;
+      row.appendChild(namaCell);
+
+      // Kolom NIP
+      const nipCell = document.createElement('td');
+      nipCell.classList.add('px-4', 'py-2', 'text-sm', 'text-gray-600');
+      nipCell.textContent = employee.nip;
+      row.appendChild(nipCell);
+
+      // Kolom QR Code
+      const qrCell = document.createElement('td');
+      qrCell.classList.add('px-4', 'py-2', 'text-sm', 'text-gray-600');
+      const qrButton = document.createElement('button');
+      qrButton.textContent = "Lihat";
+      qrButton.classList.add('bg-blue-500', 'text-white', 'px-3', 'py-1', 'rounded-lg', 'hover:bg-blue-600', 'focus:outline-none');
+      qrButton.dataset.nip = employee.nip;
+
+      // Tambahkan event untuk membuka modal
+      qrButton.addEventListener('click', () => showModal(employee.nip));
+      qrCell.appendChild(qrButton);
+      row.appendChild(qrCell);
+
+      // Tambahkan row ke tabel
+      tableBody.appendChild(row);
+    });
+
+    // Modal Logic
+    const modal = document.getElementById('qrModal');
+    const modalCanvas = document.getElementById('qrCanvas');
+    const closeModal = document.getElementById('closeModal');
+
+    function showModal(nip) {
+      // Generate QR Code (HD)
+      const qr = new QRious({
+        element: modalCanvas,
+        value: nip,
+        size: 300, // HD size
+      });
+      modal.classList.remove('hidden');
+    }
+
+    closeModal.addEventListener('click', () => {
+      modal.classList.add('hidden');
+    });
+
+    // Search Functionality
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', () => {
+      const filter = searchInput.value.toLowerCase();
+      const rows = document.querySelectorAll('#dataTable tr');
+      rows.forEach(row => {
+        const nama = row.cells[1].textContent.toLowerCase();
+        const nip = row.cells[2].textContent.toLowerCase();
+        if (nama.includes(filter) || nip.includes(filter)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
         }
-
-        // Fungsi untuk submit form dan mengirim data ke spreadsheet melalui API SheetDB
-        function submitForm() {
-            // Ambil data dari form
-            const name = document.getElementById('name').value;
-            const nip = document.getElementById('nip').value;
-            const room = document.getElementById('room').value;
-            const email = document.getElementById('email').value;
-			
-            // Data yang akan dikirim
-            const data = {
-                data: {
-                    Nama: name,
-                    NIP: nip,
-                    Ruang: room,
-					Email: email
-                }
-            };
-
-            // Kirim data ke SheetDB API dengan target Sheet1
-            fetch("https://sheetdb.io/api/v1/9fjbl4tka5tjb", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Tampilkan pesan sukses jika berhasil
-                document.getElementById('successMessage').style.display = 'block';
-                document.getElementById('absenForm').reset();
-                document.getElementById('formSection').style.display = 'none';
-            })
-            .catch(error => {
-                // Tampilkan pesan error jika gagal
-                document.getElementById('errorMessage').style.display = 'block';
-            });
-        }
-    </script>
+      });
+    });
+  </script>
 </body>
 </html>
