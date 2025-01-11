@@ -1,159 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <title>Data Karyawan</title>
-</head>
-<body class="bg-gray-100 font-sans">
-  <div class="container mx-auto py-8">
-    <h1 class="text-2xl font-bold text-center mb-6">DATA NIP KARYAWAN BARU</h1>
-	<h2 class="font-bold text-left mb-6 text-blue-500 hover:text-blue-700"><a href="https://app.harapananda.com/sigawai" target="_blank" rel="noopener noreferrer">Buka Aplikasi SIGAWAI</a></h2>
-   
-
-   <!-- Input Cari -->
-    <div class="mb-4">
-      <input 
-        id="searchInput" 
-        type="text" 
-        placeholder="Cari nama atau NIP..." 
-        class="w-full px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-      />
-    </div>
-
-    <!-- Tabel -->
-    <div class="overflow-x-auto">
-      <table class="table-auto w-full bg-white rounded-lg shadow-md">
-        <thead class="bg-gray-200">
-          <tr>
-            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">No</th>
-            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Nama</th>
-            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">NIP</th>
-            <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">QR Code</th>
-          </tr>
-        </thead>
-        <tbody id="dataTable">
-          <!-- Data akan di-generate oleh JavaScript -->
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Modal -->
-  <div id="qrModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden">
-    <div class="bg-white rounded-lg p-6 relative">
-      <button 
-        id="closeModal" 
-        class="absolute top-2 right-2 text-gray-400 hover:text-gray-600 focus:outline-none">
-        ✖
-      </button>
-      <h2 class="text-lg font-bold text-gray-700 mb-4">QR Code (HD)</h2>
-      <canvas id="qrCanvas" class="mx-auto"></canvas>
-    </div>
-  </div>
-
-  <script>
-    // Data karyawan
-    const employees = [
-      { no: 1, nama: "Rafi Tegar Fachrezi, A.Md.Kom", nip: "120404032214" },
-      { no: 2, nama: "Muhammad Irfan Bakhtiar, S.Tr.Kom", nip: "120404022215" },
-      { no: 3, nama: "Firyal Aulia Rahma, S.Ak, ACPA", nip: "120404022216" },
-      { no: 4, nama: "Muhammad Fa'iz Al'azami, A.Md.Kep", nip: "120402032217" },
-      { no: 5, nama: "Kartika Dwi Rangga, A.Md.Kep", nip: "120402032218" },
-      { no: 6, nama: "Muhammad Daffa Musyaffa, A.Md.Kep", nip: "120402032219" },
-      { no: 7, nama: "Mohammad Bilal Firmansyah, A.Md.Kep", nip: "120402032220" },
-      { no: 8, nama: "Wildan Ardhi Nurdiansyah, A.Md.Kep", nip: "120402032221" },
-      { no: 9, nama: "Rizki Karunia Febriyanto, A.Md.Kep", nip: "120402032222" },
-      { no: 10, nama: "M. Rudy Afandy, A.Md.Kep", nip: "120402032223" },
-	  { no: 11, nama: "Dwi Guna Agung Riyadi, S.Kep.Ners", nip: "120402022224" },
-      { no: 12, nama: "Muhammad Rafi Fathurrohman, S.Kep.Ners", nip: "120402022225" },
-      { no: 13, nama: "Agus Priyanto, S.Kep.Ners", nip: "120402022226" },
-      { no: 14, nama: "Muhamad Maulana Rafi, S.Kep.Ners", nip: "120402022227" },
-      { no: 15, nama: "Bagus Fadhilah, S.Kep.Ners", nip: "120402022228" },
-      { no: 16, nama: "Hilda Sulistya Utami, S.Kes.Ftr", nip: "120402022229" },
-      { no: 17, nama: "Dyah Sulistyowati, S.Fis", nip: "120402022230" },
-      { no: 18, nama: "Amalia Mulyani, S.Tr.Kes", nip: "120402022231" },
-      { no: 19, nama: "Nurul Fajar Sakinah, A.Md.Kes", nip: "120402022232" },
-      { no: 20, nama: "Aprilia Mega Fortuna, A.Md.Ftr", nip: "120402032234" },
-    ];
-
-    // Generate Tabel
-    const tableBody = document.getElementById('dataTable');
-    employees.forEach(employee => {
-      const row = document.createElement('tr');
-      row.classList.add('border-t');
-
-      // Kolom No
-      const noCell = document.createElement('td');
-      noCell.classList.add('px-4', 'py-2', 'text-sm', 'text-gray-600');
-      noCell.textContent = employee.no;
-      row.appendChild(noCell);
-
-      // Kolom Nama
-      const namaCell = document.createElement('td');
-      namaCell.classList.add('px-4', 'py-2', 'text-sm', 'text-gray-600');
-      namaCell.textContent = employee.nama;
-      row.appendChild(namaCell);
-
-      // Kolom NIP
-      const nipCell = document.createElement('td');
-      nipCell.classList.add('px-4', 'py-2', 'text-sm', 'text-gray-600');
-      nipCell.textContent = employee.nip;
-      row.appendChild(nipCell);
-
-      // Kolom QR Code
-      const qrCell = document.createElement('td');
-      qrCell.classList.add('px-4', 'py-2', 'text-sm', 'text-gray-600');
-      const qrButton = document.createElement('button');
-      qrButton.textContent = "Lihat";
-      qrButton.classList.add('bg-blue-500', 'text-white', 'px-3', 'py-1', 'rounded-lg', 'hover:bg-blue-600', 'focus:outline-none');
-      qrButton.dataset.nip = employee.nip;
-
-      // Tambahkan event untuk membuka modal
-      qrButton.addEventListener('click', () => showModal(employee.nip));
-      qrCell.appendChild(qrButton);
-      row.appendChild(qrCell);
-
-      // Tambahkan row ke tabel
-      tableBody.appendChild(row);
-    });
-
-    // Modal Logic
-    const modal = document.getElementById('qrModal');
-    const modalCanvas = document.getElementById('qrCanvas');
-    const closeModal = document.getElementById('closeModal');
-
-    function showModal(nip) {
-      // Generate QR Code (HD)
-      const qr = new QRious({
-        element: modalCanvas,
-        value: nip,
-        size: 300, // HD size
-      });
-      modal.classList.remove('hidden');
-    }
-
-    closeModal.addEventListener('click', () => {
-      modal.classList.add('hidden');
-    });
-
-    // Search Functionality
-    const searchInput = document.getElementById('searchInput');
-    searchInput.addEventListener('input', () => {
-      const filter = searchInput.value.toLowerCase();
-      const rows = document.querySelectorAll('#dataTable tr');
-      rows.forEach(row => {
-        const nama = row.cells[1].textContent.toLowerCase();
-        const nip = row.cells[2].textContent.toLowerCase();
-        if (nama.includes(filter) || nip.includes(filter)) {
-          row.style.display = '';
-        } else {
-          row.style.display = 'none';
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Input Surat Keluar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
         }
-      });
-    });
-  </script>
+        h1 {
+            text-align: center;
+            font-size: 48px;
+            color: #4CAF50;
+            margin-bottom: 30px;
+        }
+        form {
+            max-width: 400px;
+            margin: auto;
+        }
+        label {
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="nextNumber">...</h1> <!-- Menampilkan nomor berikutnya -->
+
+    <form id="suratForm">
+        <label for="tanggalSurat">Tanggal Surat:</label>
+        <input type="date" id="tanggalSurat" name="tanggalSurat" required>
+
+        <label for="nomorAgenda">Nomor Agenda : /RSUI-HA/DIR/I/2025</label>
+        <input type="text" id="nomorAgenda" name="nomorAgenda" required>
+
+        <label for="kepada">Kepada :</label>
+        <input type="text" id="kepada" name="kepada">
+
+        <label for="isiSurat">Isi Surat :</label>
+        <textarea id="isiSurat" name="isiSurat" rows="4" ></textarea>
+
+        <button type="button" onclick="submitForm()">Kirim</button>
+    </form>
+
+    <script>
+        const API_ENDPOINT = "https://sheetdb.io/api/v1/6i97tn22pme2f"; // Ganti dengan API Endpoint Anda
+
+        // Fungsi untuk mendapatkan nomor berikutnya
+        async function getNextNumber() {
+            try {
+                // Mengambil semua data dari SheetDB.io
+                const response = await fetch(API_ENDPOINT);
+                const data = await response.json();
+
+                // Menentukan nomor berikutnya berdasarkan data terakhir
+                const lastEntry = data[data.length - 1]; // Ambil entri terakhir
+                const nextNumber = lastEntry && lastEntry.NO ? parseInt(lastEntry.NO) + 1 : 1;
+
+                // Menampilkan nomor berikutnya di halaman
+                document.getElementById("nextNumber").textContent = `Nomor Surat : ${nextNumber}`;
+                return nextNumber;
+            } catch (err) {
+                console.error("Gagal mengambil data:", err);
+                document.getElementById("nextNumber").textContent = "Nomor Tidak Ditemukan!";
+                return 1; // Default jika terjadi kesalahan
+            }
+        }
+
+        // Panggil fungsi untuk mendapatkan nomor berikutnya saat halaman dimuat
+        let currentNumber = 1; // Variabel global untuk nomor saat ini
+        getNextNumber().then(number => currentNumber = number);
+
+        // Fungsi untuk mengirim data ke SheetDB.io
+        async function submitForm() {
+            const tanggalSurat = document.getElementById("tanggalSurat").value;
+            const nomorAgenda = document.getElementById("nomorAgenda").value;
+            const kepada = document.getElementById("kepada").value;
+            const isiSurat = document.getElementById("isiSurat").value;
+
+            if (!tanggalSurat || !nomorAgenda || !kepada || !isiSurat) {
+                alert("Semua kolom harus diisi!");
+                return;
+            }
+
+            const data = {
+                data: {
+                    NO: currentNumber,
+                    "TANGGAL SURAT": tanggalSurat,
+                    "NOMOR AGENDA": nomorAgenda,
+                    "KEPADA": kepada,
+                    "ISI SURAT": isiSurat
+                }
+            };
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                if (response.ok) {
+                    alert("Data berhasil dikirim!");
+                    document.getElementById("suratForm").reset();
+                    getNextNumber().then(number => currentNumber = number); // Refresh nomor berikutnya
+                } else {
+                    const error = await response.json();
+                    alert("Gagal mengirim data: " + error.message);
+                }
+            } catch (err) {
+                console.error("Error:", err);
+                alert("Terjadi kesalahan saat mengirim data!");
+            }
+        }
+    </script>
 </body>
 </html>
