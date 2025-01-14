@@ -25,6 +25,14 @@
         .modal.active {
             display: flex;
         }
+        .modal-content {
+            width: 80%;
+        }
+        @media (min-width: 1024px) {
+            .modal-content {
+                width: 33%;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 font-sans">
@@ -105,7 +113,7 @@
 
     <!-- Modal Edit -->
     <div id="editModal" class="modal">
-        <div class="bg-white rounded shadow-lg w-full lg:w-1/3 p-6">
+        <div class="modal-content bg-white rounded shadow-lg p-6">
             <h2 class="text-xl font-bold mb-4">Edit Data Surat Keluar</h2>
             <form id="editForm">
                 <div class="mb-4">
@@ -138,6 +146,7 @@
 
         // Data untuk state aplikasi
         let allData = [];
+        let originalData = [];
         let editData = null;
         let currentPage = 1;
         let rowsPerPage = 10;
@@ -162,7 +171,9 @@
         async function fetchData() {
             try {
                 const response = await fetch(API_ENDPOINT);
-                allData = await response.json();
+                const data = await response.json();
+                originalData = [...data]; // Simpan data asli untuk reset pencarian
+                allData = [...data];
                 allData.reverse(); // Urutkan data terbaru di atas
                 updateTable();
                 generatePagination();
@@ -205,6 +216,7 @@
                 button.addEventListener("click", () => {
                     currentPage = i;
                     updateTable();
+                    generatePagination();
                 });
                 paginationControls.appendChild(button);
             }
@@ -222,7 +234,7 @@
         // Filter data berdasarkan input pencarian
         function filterData() {
             const searchInput = document.getElementById("searchInput").value.toLowerCase();
-            allData = allData.filter((item) => {
+            allData = originalData.filter((item) => {
                 return Object.values(item).some((value) => 
                     value.toString().toLowerCase().includes(searchInput)
                 );
@@ -234,12 +246,12 @@
 
         // Modal edit entry
         function openEditModal(no) {
-            editData = allData.find((item) => item.NO == no);
+            editData = originalData.find((item) => item.NO == no);
             if (editData) {
-                document.getElementById("editTanggalSurat").value = editData["TANGGAL SURAT"];
-                document.getElementById("editNomorAgenda").value = editData["NOMOR AGENDA"];
-                document.getElementById("editKepada").value = editData.KEPADA;
-                document.getElementById("editIsiSurat").value = editData["ISI SURAT"];
+                document.getElementById("editTanggalSurat").value = editData["TANGGAL SURAT"] || "";
+                document.getElementById("editNomorAgenda").value = editData["NOMOR AGENDA"] || "";
+                document.getElementById("editKepada").value = editData.KEPADA || "";
+                document.getElementById("editIsiSurat").value = editData["ISI SURAT"] || "";
                 document.getElementById("editModal").classList.add("active");
             }
         }
